@@ -1,0 +1,457 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title> Design Your Street </title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+	<style>
+		/*Graphic Styles*/
+		body {
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: 12px;
+			background-color: #ffffff;
+			text-align: center;
+		}        
+
+        h2 {
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: 28px;
+			color: #777777;
+			margin-bottom: 0px;
+			padding-bottom: 0px;
+		}
+
+        h4 {
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: 14px;
+			margin:0;
+			padding:0;text-align:center;
+		}
+		circle {
+			stroke: gray;
+			fill: yellow;
+			opacity: 0.2;
+		}
+		
+        .btn{
+            font-size:12px;
+            
+        }
+		/* Use style classes to set colors by fuel type */
+        .tree{fill:#73AA42;stroke:#669940;opacity:0.2} 
+        .sky {fill:#86BCB3;stroke:#93CFC5;opacity:0.2}     
+        .building {fill:brown;stroke:orange;opacity:0.2}   
+        .road {fill:grey;stroke:black;opacity:0.2} 
+		
+        
+        
+        
+        
+        
+        
+        .mynav{
+            padding:5px;
+            font-size:12px;
+            color:black;
+            text-decoration: none;
+        }
+
+        #select{
+            position: absolute;
+            top: 100px;
+            left: 100px;
+            width: 350px;
+            font-size: 18px;
+            text-align: left;
+        }
+        #chart{
+            position: absolute;
+            top: 200px;
+            left: 100px;
+            width: 700px;
+            font-size: 12px;
+            text-align: left;
+        }
+        #streetimage{
+            position: absolute;
+            top: 200px;
+            left: 1100px;
+            width: 600px;
+            font-size: 12px;
+            text-align: left;
+        }
+        #scoreNum{
+            position: absolute;
+            top: 260px;
+            left: 80px;
+            width: 100px;
+            font-size: 8px;
+            text-align: right;
+        }
+        #streetElement{
+            position: absolute;
+            top: 850px;
+            left: 570px;
+            width: 200px;
+            font-size: 8px;
+            text-align: right;
+        }
+        .slidecontainer {
+          width: 100%;
+        }
+
+        .slider {
+          -webkit-appearance: none;
+          width: 100%;
+          height: 25px;
+          background: #d3d3d3;
+          outline: none;
+          opacity: 0.7;
+          -webkit-transition: .2s;
+          transition: opacity .2s;
+        }
+
+        .slider:hover {
+          opacity: 1;
+        }
+
+        .slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 25px;
+          height: 25px;
+          background: #4CAF50;
+          cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+          width: 25px;
+          height: 25px;
+          background: #4CAF50;
+          cursor: pointer;
+        }
+
+	</style>
+	
+	<script src="https://d3js.org/d3.v5.min.js"></script>
+	<script>
+		// variables and scripts
+		var data;	// to hold the data
+		var circles;
+        
+        
+		// function to get the data from file
+		function getData(city) {
+            d3.csv("data/AllScore_"+ city +".csv").then(function(d) {
+                d.forEach(function(row){
+                    row["tree"]=Number(row["tree"]);
+                    row["sky"]=Number(row["sky"]);
+                    row["building"]=Number(row["building"]);
+                    row["road"]=Number(row["road"]);
+                    row["Q2"]=Number(row["Q2"]);
+                    row["Q3"]=Number(row["Q3"]);
+                    row["Q4"]=Number(row["Q4"]);
+                    row["Q5"]=Number(row["Q5"]);
+                    row["Score"]=Number(row["Score"]);
+                });
+				data = d;
+				draw();             
+                d3.select("#cityselect").property("value",city);
+			});
+		}
+		
+		// declare some base variables
+		var drawArea, drawAreaWidth;
+		var baseline, meridian;
+		var hScale, vScale, rScale;
+        
+		
+		// draw things
+		function draw() {
+			// setup some things
+			drawArea = d3.select("#correlation");
+			drawAreaWidth = +drawArea.attr("width");
+			drawAreaHeight = Number(drawArea.attr("height"));
+			
+			toBottom = drawAreaHeight - 100;
+            toLeft =100;
+			
+			hScale = 500;
+			vScale = 60;
+			rScale = 0.25;
+            
+			
+			// now draw the circles
+			circles = drawArea.selectAll("circle")
+				.data(data);
+            
+            circles.enter().append("circle")
+                .merge(circles)
+                    .attr("cx",function(d) {
+						numX = Number(d["tree"]);
+						screenX = numX*hScale +toLeft;
+						return screenX;
+					})
+					.attr("cy",function(d) {
+						numY = Number(d["Q3"]);
+						screenY = toBottom- numY*vScale;
+						return screenY;
+					})
+					.attr("r",function(d){
+                        r= Number(d["Score"])*rScale;
+                        return r;
+                    })
+					.attr("class","tree");
+            
+            var numbers = d3.selectAll("circle").attr("cy");
+            numMean = d3.mean(numbers);
+            d3.select("#Score6")
+                .transition()
+                .attr("y1",toBottom- numMean*vScale)
+                .attr("y2",toBottom- numMean*vScale);
+
+            circles.exit().remove();
+		}
+     
+        function changeX(field){
+              var circles = d3.selectAll("circle");
+              circles.transition().duration(5000)
+                .attr("cx",function(d){
+                   	numX = Number(d[field]);
+					screenX = numX*hScale +toLeft;
+					return screenX;
+                    })
+                .attr("class",field);
+          }  
+       
+        function changeY(field){
+              var circles = d3.selectAll("circle");
+              circles.transition().duration(5000)
+                .attr("cy",function(d){
+						numY = Number(d[field]);
+						screenY = toBottom- numY*vScale;
+						return screenY;
+                    })
+                .attr("class",field);
+            
+            var numbers = d3.selectAll("circle").attr("cy");
+            numMean = d3.mean(numbers);
+            d3.select("#Score6")
+                .transition().duration(5000)
+                .attr("y1",toBottom- numMean*vScale)
+                .attr("y2",toBottom- numMean*vScale);
+          }  
+       
+            $('#multi').mdbRange({
+              width: '100%',
+              direction: 'vertical',
+              value: {
+                min: 0,
+                max: 100,
+              },
+              single: {
+                active: true,
+                value: {
+                  step: 1,
+                  symbol: ''
+                },
+                counting: false,
+                countingTarget: null,
+                bgThumbColor: '#4285F4',
+                textThumbColor: '#fff',
+                multi: {
+                  active: true,
+                  value: {
+                    step: 1,
+                    symbol: ''
+                  },
+                  counting: false,
+                  rangeLength: 2,
+                  countingTarget: null,
+                  bgThumbColor: '#4285F4',
+                  textThumbColor: '#fff'
+                },
+              }
+            });
+	</script>
+</head>
+
+
+
+<body onload="getData('SH')">
+	<h2>Design Your Street</h2>
+	<div class="mynav">
+	   <a href ="info.html">More Info</a>
+	   <a href="map.html">See Data in the Map</a>
+	</div>
+	
+	<div id="select">
+	    <p>Choose the City:</p>
+        <select id="cityselect" onchange="getData(this.value)">
+              <option value="SH">Shanghai</option>
+              <option value="London">London</option>
+              <option value="Boston">Boston</option>
+              <option value="NY">New York</option>
+              <option value="Seattle">Seattle</option> 
+              <option value="SF">San Francisco</option>   
+        </select>
+	</div>
+
+
+	<div id="chart">
+	   <svg id="correlation" width="700" height="700">
+        <g id="Axis">
+                <g>
+                    <line style="fill:#FFFFFF;" x1="100" y1="35" x2="100" y2="650"/>
+                    <g>
+                        <line style="fill:none;stroke:#58595B;stroke-width:0.5;stroke-miterlimit:10;" x1="100" y1="35" x2="100" y2="650"/>
+                        <g>
+                            <polygon style="fill:#58595B;" points="89.8,43.3 91.6,45 100,36 108.4,45 110.2,43.3 100,32.3 				"/>
+                        </g>
+                    </g>
+                </g>
+                <g>
+                    <line style="fill:#FFFFFF;" x1="677" y1="600" x2="50" y2="600"/>
+                    <g>
+                        <line style="fill:none;stroke:#58595B;stroke-width:0.5;stroke-miterlimit:10;" x1="677" y1="600" x2="50" y2="600"/>
+                        <g>
+                            <polygon style="fill:#58595B;" points="668.7,589.8 667,591.6 676,600 667,608.4 668.7,610.2 679.7,600 				"/>
+                        </g>
+                    </g>
+                </g>
+                <rect x="10.3" y="34.5" style="fill:none;" width="73.5" height="17"/>
+                <text transform="matrix(1 0 0 1 10.25 47.4235)" style="font-family:'Helvetica'; font-size:18px;">SCORE</text>
+                <rect x="85.7" y="604" style="fill:none;" width="12.3" height="17"/>
+                <text transform="matrix(1 0 0 1 85.6667 616.9235)" style="fill:#939598; font-family:'Helvetica'; font-size:18px;">0</text>
+                <rect x="70.5" y="68" style="fill:none;" width="24.4" height="17"/>
+                <text transform="matrix(1 0 0 1 84.9088 80.9235)" style="fill:#939598; font-family:'Helvetica'; font-size:18px;">8</text>
+                <rect x="630.8" y="607.8" style="fill:none;" width="24.4" height="17"/>
+                <text transform="matrix(1 0 0 1 635.151 620.6735)" style="fill:#939598; font-family:'Helvetica'; font-size:18px;">80</text>
+                <rect x="362.5" y="607.8" style="fill:none;" width="24.4" height="17"/>
+                <text transform="matrix(1 0 0 1 366.8594 620.6735)" style="fill:#939598; font-family:'Helvetica'; font-size:18px;">40</text>
+                <rect x="68.5" y="330.8" style="fill:none;" width="24.4" height="17"/>
+                <text transform="matrix(1 0 0 1 82.9505 343.6735)" style="fill:#939598; font-family:'Helvetica'; font-size:18px;">4</text>
+                <rect x="460" y="632.5" style="fill:none;" width="207" height="20.7"/>
+                <text transform="matrix(1 0 0 1 472.9624 645.4235)" style="font-family:'Helvetica'; font-size:18px;">STREET ELEMENTS %</text>
+                <line style="fill:#FFFFFF;stroke:#000000;stroke-width:2;stroke-miterlimit:10;" x1="100" y1="625" x2="100" y2="575"/>
+                <line style="fill:#FFFFFF;stroke:#000000;stroke-width:2;stroke-miterlimit:10;" x1="75" y1="600" x2="125" y2="600"/>
+                <line style="fill:#FFFFFF;stroke:#000000;stroke-width:2;stroke-miterlimit:10;" x1="96" y1="337.3" x2="100" y2="337.3"/>
+                <line style="fill:#FFFFFF;stroke:#000000;stroke-width:2;stroke-miterlimit:10;" x1="96" y1="468.6" x2="100" y2="468.6"/>
+                <line style="fill:#FFFFFF;stroke:#000000;stroke-width:2;stroke-miterlimit:10;" x1="96" y1="205.9" x2="100" y2="205.9"/>
+                <line style="fill:#FFFFFF;stroke:#000000;stroke-width:2;stroke-miterlimit:10;" x1="95.9" y1="74.6" x2="99.9" y2="74.6"/>
+                <line style="fill:#FFFFFF;stroke:#000000;stroke-width:2;stroke-miterlimit:10;" x1="652" y1="604" x2="652" y2="600"/>
+                <line style="fill:#FFFFFF;stroke:#000000;stroke-width:2;stroke-miterlimit:10;" x1="514" y1="604" x2="514" y2="600"/>
+                <line style="fill:#FFFFFF;stroke:#000000;stroke-width:2;stroke-miterlimit:10;" x1="376" y1="604" x2="376" y2="600"/>
+                <line style="fill:#FFFFFF;stroke:#000000;stroke-width:2;stroke-miterlimit:10;" x1="238" y1="604" x2="238" y2="600"/>
+            </g>
+		<g>
+			
+				<line id="Score6" style="fill:none;stroke:#ED1C24;stroke-miterlimit:10;stroke-dasharray:4.9739,4.9739;" x1="107.5" y1="254.1" x2="672" y2="254.1"/>
+                <line id="elementPercent" style="fill:none;stroke:#669940;stroke-miterlimit:10;stroke-dasharray:4.9739,4.9739;" x1="200" y1="100" x2="200" y2="600"/>
+		</g>
+	</g>
+</g>
+	   </svg>       
+
+	</div>
+	<div id="scoreNum" class="btn-group-vertical" role = "toolbar" aria-label = "Basic exmaple">
+	    <button type = "button" class="btn btn-secondary btn-light" onclick ="changeY('Q2')"> Enclosure</button>
+	    <button type = "button" class="btn btn-secondary btn-light" onclick ="changeY('Q3')"> Human Scale </button>
+	    <button type = "button" class="btn btn-secondary btn-light" onclick ="changeY('Q4')"> Complexity </button>
+	    <button type = "button" class="btn btn-secondary btn-light" onclick ="changeY('Q5')"> Comprehension Style </button>
+	</div>
+	
+	<div id="streetElement"  class="btn-group" role = "toolbar" aria-label = "Basic exmaple">
+	    <button type = "button" class="btn btn-secondary btn-light" onclick ="changeX('tree')"> Tree</button>
+	    <button type = "button" class="btn btn-secondary btn-light" onclick ="changeX('sky')"> Sky </button>
+	    <button type = "button" class="btn btn-secondary btn-light" onclick ="changeX('building')"> Building </button>
+	    <button type = "button" class="btn btn-secondary btn-light" onclick ="changeX('road')"> Road </button>
+	</div>
+	
+	<div id="streetimage">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 700 700" style="enable-background:new 0 0 700 700;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#726658;}
+	.st1{fill:#86BCB3;}
+	.st2{fill:#6D6E71;}
+	.st3{fill:none;stroke:#9E5E26;stroke-width:10;stroke-miterlimit:10;}
+	.st4{fill:#B7E1DD;}
+	.st5{fill:#DCF0EF;}
+	.st6{fill:#D1D3D4;}
+	.st7{fill:none;stroke:#FFFFFF;stroke-width:8;stroke-miterlimit:10;}
+	.st8{fill:none;stroke:#FFFFFF;stroke-width:8;stroke-miterlimit:10;stroke-dasharray:20.1856,20.1856;}
+	.st9{fill:#9FD8D0;}
+	.st10{fill:#93CFC5;}
+	.st11{fill:#9E5E26;}
+	.st12{fill:#73AA42;opacity:0.6}
+	.st13{fill:#669940;opacity:0.5}
+	.st14{fill:#7EBC42;opacity:0.5}
+</style>
+<image style="overflow:visible;" width="700" height="700" xlink:href="img/background.png"  >
+</image>
+<rect id="Ground" x="-0.9" y="417.6" class="st0" width="701.7" height="282.5"/>
+<g id="Building">
+	<rect x="-0.9" y="205.8" class="st1" width="180.2" height="307.7"/>
+	<rect x="519.8" y="205.8" class="st1" width="180.2" height="307.7"/>
+</g>
+<polygon id="Street" class="st2" points="700.9,700.1 -0.9,700.1 279.1,417.6 420.9,417.6 "/>
+<line class="st3" x1="149.6" y1="312.5" x2="149.6" y2="543"/>
+<polyline class="st3" points="107.6,332.5 149.6,464 204.9,369 "/>
+<line class="st3" x1="544.5" y1="312.5" x2="544.5" y2="543"/>
+<polyline class="st3" points="502.5,332.5 544.5,464 599.9,369 "/>
+<g id="TreeCircle">
+    
+
+	<ellipse class="st13" cx="179.3" cy="324.8" rx="100" ry="120"/>
+	<ellipse class="st14" cx="126.6" cy="295.4" rx="100" ry="120"/>
+	<ellipse class="st12" cx="126.6" cy="327.9" rx="100" ry="120"/>
+	<ellipse class="st13" cx="563.4" cy="327.9" rx="100" ry="120"/>
+	<ellipse class="st14" cx="521.6" cy="295.4" rx="100" ry="120"/>
+	<ellipse class="st12" cx="513.3" cy="317.1" rx="100" ry="120"/>
+</g>
+<g>
+	<g>
+		<line class="st7" x1="349.1" y1="417.6" x2="349.1" y2="427.6"/>
+		<line class="st8" x1="349.1" y1="447.8" x2="349.1" y2="679.9"/>
+		<line class="st7" x1="349.1" y1="690" x2="349.1" y2="700"/>
+	</g>
+</g>
+</svg>
+
+
+<div class="slidecontainer">
+  <input type="range" min="1" max="80" value="15" class="slider" id="myRange">
+  <p>Tree% : <span id="demo"></span></p>
+</div>
+
+    <script>
+    var slider = document.getElementById("myRange");
+    var output = document.getElementById("demo");
+    output.innerHTML = slider.value;
+
+    slider.oninput = function() {
+      output.innerHTML = this.value;
+      scaleTree(this.value);
+      moveElementPercentLine(this.value);
+    }
+     function scaleTree(r){
+         d3.select('#TreeCircle').selectAll('ellipse').style('rx',r*2.6+60).style('ry',r*3.12+72);
+     }
+    function moveElementPercentLine(d){
+        d3.select('#elementPercent').attr('x1',7.13*d+93).attr('x2',7.13*d+93);
+    }
+    
+
+    </script>
+
+
+	</div>
+
+</body>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+</html>

@@ -1,0 +1,139 @@
+<!doctype html>
+<!-- Head -->
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <!-- Custom styles for this template -->
+  <link href="./css/mystyle.css" rel="stylesheet">
+  <!-- Add Google Fonts support -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i" rel="stylesheet">
+    
+
+  <!-- D3 -->
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <!-- Mapbox-->
+  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.js'></script>
+  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.css' rel='stylesheet' />
+
+  <title>Street Score</title>
+</head>
+
+
+<body>
+
+  <!-- HEADER --> 
+  <header>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top">
+      <!-- Logo -->
+      <a class="navbar-brand" id="logo" href="index.html">Street Score</a>
+    </nav>
+  </header>
+
+
+  <main role="main">
+    <div id="map"></div>
+
+    <!--dropdown-->
+    <div id="dropdown">
+       <div class="row">
+        <select id="selectCity">
+          <option value="sh">Shanghai</option>
+          <option value="nyc">New York City</option>
+          <option value="sf">San Francisco</option>
+          <option value="bos">Boston</option>
+          <option value="seattle">Seattle</option>
+          <option value="london">London</option>
+        </select>
+            <i class="fa fa-question-circle popup" style="font-size:25px;color:grey" onclick="myPopup('myPopupQues-01')">
+              <span class="popuptext" id="myPopupQues-01">Select to Navigate to another City<br> Overall Score Evaluation across 5 other Global Innovative Cities with Shanghai <br>
+              <br>
+              <a href="methods.html#highlight3">More Information</a>
+              </span>
+            </i>     
+        </div>
+
+    <!--display mode-->
+      <div id="visLayers" class="row">
+          <label id="mySwitch" class="switch">
+            <input class="switch-input" type="checkbox" />
+            <span class="switch-label" data-on="Prediction" data-off="Sample Images"></span> 
+            <span class="switch-handle"></span> 
+          </label>
+            <i class="fa fa-question-circle popup" style="font-size:25px;color:grey" onclick="myPopup('myPopupQues-02')">
+              <span class="popuptext" id="myPopupQues-02">In "Sample Image" Mode, street images on specific locations will display.<br><br> 
+              In "Prediction" Mode, average scores over the city will display.<br><br>
+              Visualize other geographic information layers below<br><br>
+              <a href="methods.html#highlight2">More Information</a>
+            </span>
+            </i>
+        </div>
+        <br>
+      <div class="layers-control" id="layers-control1"> </div>
+      <div class="layers-control" id="layers-control2"> </div>
+
+
+   </div>
+
+    <!-- Legend -->
+        <div id='score-legend' class='legend'>
+        <h4>Score</h4>
+            <div><span style='background-color: #0bfc03'></span>10</div>
+            <div><span style='background-color: #b1fc03'></span>7.5</div>
+            <div><span style='background-color: #fce703'></span>5</div>
+            <div><span style='background-color: #fc8403'></span>2.5</div>
+            <div><span style='background-color: #fc0303'></span>0</div>
+        </div>
+
+        <div id='legend-1' class='legend'>
+        <h4>Enclosure</h4>
+            <div><span style='background-color: #70a7ff'></span>10</div>
+            <div><span style='background-color: #1c67fc'></span>7.5</div>
+            <div><span style='background-color: #003bb0'></span>5</div>
+            <div><span style='background-color: #002369'></span>2.5</div>
+            <div><span style='background-color: #000000'></span>0</div>
+        </div>
+        <div id='legend-2' class='legend'>
+        <h4>Humanscale</h4>
+            <div><span style='background-color: #ffffff'></span>10</div>
+            <div><span style='background-color: #ff7070'></span>7.5</div>
+            <div><span style='background-color: #d61111'></span>5</div>
+            <div><span style='background-color: #4a0404'></span>2.5</div>
+            <div><span style='background-color: #000000'></span>0</div>
+        </div>        
+        <div id='legend-3' class='legend'>
+        <h4>Complexity</h4>
+            <div><span style='background-color: #ffffff'></span>10</div>
+            <div><span style='background-color: #a39e9e'></span>7.5</div>
+            <div><span style='background-color: #615d59'></span>5</div>
+            <div><span style='background-color: #1a1613'></span>2.5</div>
+            <div><span style='background-color: #000000'></span>0</div>
+        </div>        
+        <div id='legend-4' class='legend'>
+        <h4>Imageability</h4>
+            <div><span style='background-color: #ffffff'></span>10</div>
+            <div><span style='background-color: #ff9e29'></span>7.5</div>
+            <div><span style='background-color: #9c5d00'></span>5</div>
+            <div><span style='background-color: #a39e9e'></span>2.5</div>
+            <div><span style='background-color: #000000'></span>0</div>
+        </div>
+
+
+ 
+  </body>
+
+<!-- JavaScript -->
+    <!-- Bootstrap -->
+        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+        
+    <!-- Mapbox -->
+        <script src="./js/mymap.js"></script>
+
+
+</html>
