@@ -20,6 +20,15 @@ h1,h2,h3,h4,h5,h6 {
     letter-spacing: 2px;
 }
 
+h6 { 
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+    font-size: 9px;
+    line-height: 140%;
+    color: black;
+    letter-spacing: 2px;
+}
+
 h1, h2 {
     color: black;
     background-color: white;
@@ -221,8 +230,8 @@ button {
     background:rgba(169, 169, 169, 0.6);
     border: 1px solid white;
     border-radius: 0;
-    width: 220px;
-    height: 220px;
+    width: 320px;
+    height: 320px;
     overflow: auto;
 }
 
